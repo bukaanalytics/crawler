@@ -6,7 +6,7 @@ config = {
     'author': 'bukaanalytics',
     'url': 'https://github.com/bukaanalytics/crawler',
     'version': '0.0.1',
-    'install_requires': ['pymongo', 'requests'],
+    'install_requires': ['pymongo', 'pytz', 'requests'],
     'packages': [],
     'scripts': [],
     'license':'MIT'
