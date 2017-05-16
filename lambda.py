@@ -6,6 +6,7 @@ import json
 import os
 import pytz
 import requests
+import time
 
 client = MongoClient(os.environ['URL_MONGO'])
 db = client['bukaanalytics']
@@ -38,6 +39,7 @@ def update_product_stat(product):
 
   data_stat = {}
   data_stat['date'] = datetime_jakarta.strftime("%Y-%m-%d")
+  data_stat['date_epoch'] = int(time.time());
   data_stat['day_name'] = datetime_jakarta.strftime("%A")
   data_stat['product_id'] = product['id']
   data_stat['view_total'] = product['view_count']
