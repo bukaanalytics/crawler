@@ -62,7 +62,7 @@ def update_product_stat(product):
 def get_average_market_stat(product_name):
   #get 50 first results
   search_count = 50;
-  search_request = requests.get('https://api.bukalapak.com/v2/products.json?keywords=%s&per_page=%d' % product_name, search_count)
+  search_request = requests.get('https://api.bukalapak.com/v2/products.json?keywords=%s&per_page=%d' % (product_name, search_count))
   raw_search = search_request.json()
   raw_search_count = len(raw_search['products'])
 
