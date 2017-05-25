@@ -7,6 +7,7 @@ import os
 import pytz
 import requests
 import time
+import urllib
 
 client = MongoClient(os.environ['URL_MONGO'])
 db = client['bukaanalytics']
@@ -49,7 +50,44 @@ def update_product_stat(product):
   data_stat['interest_total'] = product['interest_count']
   data_stat['interest_count'] = (data_stat['interest_total'] - entry_yesterday['interest_total']) if (entry_yesterday != None) else 0 
 
+  avg_market_stat = get_average_market_stat(product['name'])
+  data_stat['market_view_total'] = avg_market_stat['avg_view']
+  data_stat['market_view_count'] = (data_stat['market_view_total'] - entry_yesterday['market_view_total']) if (entry_yesterday != None) else 0
+  data_stat['market_sold_total'] = avg_market_stat['avg_sold']
+  data_stat['market_sold_count'] = (data_stat['market_sold_total'] - entry_yesterday['market_sold_total']) if (entry_yesterday != None) else 0
+  data_stat['market_interest_total'] = avg_market_stat['avg_interest']
+  data_stat['market_interest_count'] = (data_stat['market_interest_total'] - entry_yesterday['market_interest_total']) if (entry_yesterday != None) else 0
+
   collection_stats.insert_one(data_stat)
+
+def get_average_market_stat(product_name):
+  #get 50 first results
+  search_count = 50;
+  search_request = requests.get('https://api.bukalapak.com/v2/products.json?keywords=%s&per_page=%d' % (urllib.quote_plus(product_name), search_count))
+  raw_search = search_request.json()
+  raw_search_count = len(raw_search['products'])
+
+  avg_market_stat = {}
+  avg_market_stat['avg_view'] = 0
+  avg_market_stat['avg_sold'] = 0
+  avg_market_stat['avg_interest'] = 0
+
+  if(raw_search_count > 0):
+    avg_view = 0;
+    avg_sold = 0;
+    avg_interest = 0;
+    for product in raw_search['products']:
+      avg_view += product['view_count']
+      avg_sold += product['sold_count']
+      avg_interest += product['interest_count']
+    #currently using integer division, will change variables to floating numbers if necessary
+    avg_view = avg_view / raw_search_count
+    avg_sold = avg_sold / raw_search_count
+    avg_interest = avg_interest / raw_search_count
+    avg_market_stat['avg_view'] = avg_view
+    avg_market_stat['avg_sold'] = avg_sold
+    avg_market_stat['avg_interest'] = avg_interest
+  return avg_market_stat
 
 def handler(event, context):
   #get all from 'users' collection
